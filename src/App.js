@@ -28,6 +28,7 @@ function App() {
             'usd': usd,
             'organization_id': item.organization_id,
             'type': item.type,
+            'reference': item.reference,
           }
         });
         setItemsData(items);

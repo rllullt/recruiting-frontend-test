@@ -1,9 +1,14 @@
 import React from 'react';
 import { useState } from 'react';
+import Button from './Button';
+import Modal from './Modal';
+import green_check from '../assets/green-check.png';
 
 const InvoicesList = ({ items }) => {
     const [selectedItemId, setSelectedItemId] = useState(undefined);
     const [selectedCreditNoteId, setSelectedCreditNoteId] = useState(undefined);
+
+    const [isCreditNoteModalOpen, setIsCreditNoteModalOpen] = useState(false);
 
     console.log('received items:', items);
 
@@ -90,7 +95,7 @@ const InvoicesList = ({ items }) => {
                                         <td align='center' className='p-2 text-center'>
                                             <input
                                                 type="radio"
-                                                name="receivedInvoice"
+                                                name="creditNoteInvoice"
                                                 checked={selectedCreditNoteId === item.id}
                                                 onChange={() => handleCreditNoteSelect(item)}
                                                 className="cursor-pointer p-2"
@@ -104,6 +109,32 @@ const InvoicesList = ({ items }) => {
                             </tbody>
                         </table>
                     </div>
+
+                    {selectedCreditNoteId ? (
+                        <div className='flex items-center justify-center h-screen'>
+                            <Button className='bg-blue-500' onClick={() => {setIsCreditNoteModalOpen(true)}}>
+                                Asignar
+                            </Button>
+
+                            <Modal
+                                isOpen={isCreditNoteModalOpen}
+                                onClick={() => setIsCreditNoteModalOpen(false)}
+                                onClickText='Seguir asignando'
+                            >
+                                <div style={{ display: 'grid', placeItems: 'center', textAlign: 'center', padding: '20px' }}>
+                                    <img
+                                        src={green_check}
+                                        style={{
+                                            width: 60,
+                                        }}
+                                        alt='Green ckeck'
+                                    />
+                                </div>
+                                <p>Nota de crédito con ID ‘{selectedCreditNoteId}’</p>
+                                <p>asignada correctamente</p>
+                            </Modal>
+                        </div>
+                    ) : (<div></div>)}
                 </>
             ) : (<div></div>)}
         </>

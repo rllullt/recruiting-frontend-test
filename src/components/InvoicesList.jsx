@@ -6,11 +6,9 @@ import green_check from '../assets/green-check.png';
 
 const InvoicesList = ({ items }) => {
     const [selectedItemId, setSelectedItemId] = useState(undefined);
-    const [selectedCreditNoteId, setSelectedCreditNoteId] = useState(undefined);
+    const [selectedCreditNoteIds, setSelectedCreditNoteIds] = useState([]);
 
     const [isCreditNoteModalOpen, setIsCreditNoteModalOpen] = useState(false);
-
-    console.log('received items:', items);
 
     const handleItemSelect = item => {
         if (selectedItemId === item.id) {
@@ -23,12 +21,14 @@ const InvoicesList = ({ items }) => {
     };
 
     const handleCreditNoteSelect = (item) => {
-        if (selectedCreditNoteId === item.id) {
-            setSelectedCreditNoteId(undefined);
+        if (selectedCreditNoteIds.includes(item.id)) {
+            setSelectedCreditNoteIds(selectedCreditNoteIds.filter(it => it.id !== item.id));
         }
         else {
-            setSelectedCreditNoteId(item.id);
-            console.log('selected credit note:', selectedCreditNoteId);
+            const ids = selectedCreditNoteIds.filter(() => true);
+            ids.push(item.id);
+            setSelectedCreditNoteIds(ids);
+            console.log('selected credit notes:', selectedCreditNoteIds);
         }
         console.log('handle credit note select');
     }
@@ -86,7 +86,7 @@ const InvoicesList = ({ items }) => {
                                     <tr
                                         key={item.id}
                                         className={`cursor-pointer rounded transition-all duration-200 ${
-                                            selectedCreditNoteId === item.id
+                                            selectedCreditNoteIds.includes(item.id)
                                                 ? 'bg-blue-500 text-white'
                                                 : 'hover:bg-gray-100'
                                         }`}
@@ -96,7 +96,7 @@ const InvoicesList = ({ items }) => {
                                             <input
                                                 type="radio"
                                                 name="creditNoteInvoice"
-                                                checked={selectedCreditNoteId === item.id}
+                                                checked={selectedCreditNoteIds.includes(item.id)}
                                                 onChange={() => handleCreditNoteSelect(item)}
                                                 className="cursor-pointer p-2"
                                             />
@@ -110,34 +110,56 @@ const InvoicesList = ({ items }) => {
                         </table>
                     </div>
 
-                    {selectedCreditNoteId ? (
-                        <div className='flex items-center justify-center h-screen'>
-                            <Button className='bg-blue-500' onClick={() => {setIsCreditNoteModalOpen(true)}}>
-                                Asignar
-                            </Button>
+                    {selectedCreditNoteIds.length > 0 ? (
+                        <>
+                            <p>Asignando {selectedCreditNoteIds.length} notas de crédito con monto de ${
+                                        items
+                                            .filter(item => selectedCreditNoteIds.includes(item.id))
+                                            .reduce((memo, item) => memo + item.clp, 0)
+                                    } CLP{}</p>
+                            <div className='flex items-center justify-center h-screen'>
+                                <Button className='bg-blue-500' onClick={() => {setIsCreditNoteModalOpen(true)}}>
+                                    Asignar
+                                </Button>
 
-                            <Modal
-                                isOpen={isCreditNoteModalOpen}
-                                onClick={() => {
-                                    setIsCreditNoteModalOpen(false);
-                                    setSelectedItemId(undefined);
-                                    setSelectedCreditNoteId(undefined);
-                                }}
-                                onClickText='Seguir asignando'
-                            >
-                                <div style={{ display: 'grid', placeItems: 'center', textAlign: 'center', padding: '20px' }}>
-                                    <img
-                                        src={green_check}
-                                        style={{
-                                            width: 60,
-                                        }}
-                                        alt='Green ckeck'
-                                    />
-                                </div>
-                                <p>Nota de crédito con ID ‘{selectedCreditNoteId}’</p>
-                                <p>asignada correctamente</p>
-                            </Modal>
-                        </div>
+                                <Modal
+                                    isOpen={isCreditNoteModalOpen}
+                                    onClick={() => {
+                                        setIsCreditNoteModalOpen(false);
+                                        setSelectedItemId(undefined);
+                                        selectedCreditNoteIds.forEach(id => {
+                                            items = items.filter(item => item.id !== id)
+                                        })
+                                        setSelectedCreditNoteIds([]);
+                                    }}
+                                    onClickText='Seguir asignando'
+                                >
+                                    <div style={{ display: 'grid', placeItems: 'center', textAlign: 'center', padding: '20px' }}>
+                                        <img
+                                            src={green_check}
+                                            style={{
+                                                width: 60,
+                                            }}
+                                            alt='Green ckeck'
+                                        />
+                                    </div>
+                                    <p>Notas de crédito con IDs</p>
+                                    <p>‘{selectedCreditNoteIds.join(', ')}’</p>
+                                    <p>asignadas correctamente</p>
+                                    <p>Monto: ${
+                                        items
+                                            .filter(item => selectedCreditNoteIds.includes(item.id))
+                                            .reduce((memo, item) => memo + item.clp, 0)
+                                    } CLP</p>
+                                    <p>Facturas involucradas:</p>
+                                    <p>{
+                                        items.filter(item => selectedCreditNoteIds.includes(item.id))
+                                            .map(item => item.reference)
+                                            .join(', ')
+                                    }</p>
+                                </Modal>
+                            </div>
+                        </>
                     ) : (<div></div>)}
                 </>
             ) : (<div></div>)}

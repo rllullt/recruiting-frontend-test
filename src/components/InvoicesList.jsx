@@ -118,7 +118,11 @@ const InvoicesList = ({ items }) => {
 
                             <Modal
                                 isOpen={isCreditNoteModalOpen}
-                                onClick={() => setIsCreditNoteModalOpen(false)}
+                                onClick={() => {
+                                    setIsCreditNoteModalOpen(false);
+                                    setSelectedItemId(undefined);
+                                    setSelectedCreditNoteId(undefined);
+                                }}
                                 onClickText='Seguir asignando'
                             >
                                 <div style={{ display: 'grid', placeItems: 'center', textAlign: 'center', padding: '20px' }}>
